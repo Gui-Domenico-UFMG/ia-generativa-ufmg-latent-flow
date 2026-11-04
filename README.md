@@ -1,71 +1,97 @@
-# Latent Diffusion / Rectified Flow no EMNIST (36 Classes) com Classifier-Free Guidance
+# Trabalho Prático Final — IA Generativa (UFMG 2026/2)
+## Latent Diffusion / Rectified Flow no Dataset EMNIST (36 Classes)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gui-Domenico-UFMG/ia-generativa-ufmg-latent-flow/blob/main/Latent_Flow_EMNIST_Colab.ipynb)
-
-Trabalho Prático Final da disciplina de **IA Generativa (2026/2)** — **UFMG** (Prof. Vinicius M. Gonçalves).
-
----
-
-## Objetivo do Projeto
-
-Implementar um modelo generativo de **Latent Diffusion / Rectified Flow** em **PyTorch** para o dataset **EMNIST (36 classes: 10 dígitos `0-9` e 26 letras `A-Z`)**, incluindo **Condicionamento de Classe e Classifier-Free Guidance (CFG)** (+5 pontos bônus).
-
-### Formulação Matemática Implementada
-
-1. **Variational Autoencoder (VAE — Parte 5):**
-   - **Encoder Probabilístico:** $Z(x) = \mu_E(x) + \sigma_E(x) W_E$, onde $W_E \sim \mathcal{N}(0, I)$.
-   - **Decoder:** $\hat{x} = \mu_D(z) \in [0, 1]^{1 \times 28 \times 28}$.
-   - **Função Objetivo (Slides 55–59):**
-     $$\min_{\mu_D, \mu_E, \sigma_E} \sum_{i=1}^N \Big\{ R(x_i; \mu_D, \mu_E, \sigma_E) + \beta L(x_i; \mu_D, \mu_E, \sigma_E) \Big\}$$
-     onde:
-     $$R(x) = \mathbb{E}_W \left[ \frac{\|x - \mu_D(\mu_E(x) + \sigma_E(x) W)\|^2}{2} \right], \qquad L(x) = \sum_{j=1}^m \left( \frac{\sigma_{E,j}(x)^2 - 1}{2} - \ln(\sigma_{E,j}(x)) \right) + \frac{\|\mu_E(x)\|^2}{2}$$
-
-2. **Campo de Velocidade no Espaço Latente ($\Phi$ — Parte 6):**
-   - **Interpolação Retificada (Parametrização Forward $t \in [0, 1]$, Slide 72):**
-     $$z(0) \sim \mathcal{N}(0, I), \qquad z(1) \sim \mathcal{N}(\mu_E(x), \sigma_E(x)^2 I), \qquad z(t) = (1 - t) z(0) + t z(1)$$
-   - **Objetivo de Flow Matching (Slide 52):**
-     $$J(\theta) = \frac{1}{M} \sum_{i=1}^M \left\| \Phi\big(z_i(t_i), t_i, c_i; \theta\big) - \big(z_i(1) - z_i(0)\big) \right\|^2$$
-
-3. **Condicionamento & Classifier-Free Guidance (Parte 7 — Bônus):**
-   - Durante o treino de $\Phi(z, t, c)$, o rótulo $c \in \{0, \dots, 35\}$ é substituído pelo token incondicional $\varnothing = 36$ com probabilidade $p_{\text{uncond}} = 0.15$.
-   - Na geração, integramos $z(0) \sim \mathcal{N}(0, I)$ de $t=0$ até $t=1$ usando **Euler** (1ª ordem) ou **Heun** (2ª ordem) com velocidade guiada:
-     $$v_{\text{CFG}}(z, t, c) = \Phi(z, t, \varnothing) + w \cdot \big(\Phi(z, t, c) - \Phi(z, t, \varnothing)\big)$$
-   - Imagem final gerada: $x = \mu_D(z(1))$.
+Repositório do grupo para o **Trabalho Prático Final** da disciplina de **Inteligência Artificial Generativa (2026/2)** da **UFMG**, ministrada pelo **Prof. Vinicius M. Gonçalves**.
 
 ---
 
-## Estrutura do Repositório
+## 1. Visão Geral do Trabalho
 
-```text
-├── Latent_Flow_EMNIST_Colab.ipynb  # Notebook completo pronto para rodar no Google Colab (GPU)
-├── train.py                        # Script de treinamento via linha de comando
-├── requirements.txt                # Dependências Python/PyTorch
-└── src/
-    ├── dataset.py                  # Dataloader EMNIST (36 classes: '0'-'9', 'A'-'Z') com orientação corrigida
-    ├── vae.py                      # Arquitetura Conv-VAE (mu_E, sigma_E, mu_D) e função objetivo R(x) + L(x)
-    ├── flow.py                     # Rede AdaLN-MLP para o campo de velocidade Phi(z, t, c), Samplers Euler/Heun e CFG
-    └── vis.py                      # Funções de plotagem (reconstruções, grade 36 classes e trajetórias z(0)->z(1))
-```
+- **Pontuação:** **20 pontos** + até **5 pontos extras (bônus)**.
+- **Dataset:** **EMNIST** — variante contendo **36 classes** (`10 dígitos` de `0` a `9` + `26 letras` de `A` a `Z`).
+- **Framework obrigatório:** **PyTorch**.
+- **Tamanho do Grupo:** Até 3 integrantes.
+  - **Planilha de Cadastro dos Grupos:** [Google Sheets Oficial](https://docs.google.com/spreadsheets/d/1G2pjP_xNPxVwiSrMmVFaKX7bPj9JlPQ13X7mQiDTp4s/edit?usp=sharing)
 
 ---
 
-## Como Rodar
+## 2. O Que Precisa Ser Feito (Resumo Técnico)
 
-### Opção 1: Direto no Google Colab (Recomendado)
-1. Clique no botão **[Open in Colab](https://colab.research.google.com/github/Gui-Domenico-UFMG/ia-generativa-ufmg-latent-flow/blob/main/Latent_Flow_EMNIST_Colab.ipynb)** no topo deste README.
-2. No menu do Colab, verifique se a GPU está ativa em `Runtime` → `Change runtime type` → `T4 GPU`.
-3. Execute todas as células (`Runtime` → `Run all`).
+O objetivo é gerar novos caracteres manuscritos do EMNIST combinando **redução de dimensionalidade via VAE** com um **modelo de fluxo (Rectified Flow)** no espaço latente:
 
-### Opção 2: Localmente via Terminal
-```bash
-pip install -r requirements.txt
-python train.py --latent-dim 16 --vae-epochs 15 --flow-epochs 30 --cfg-scale 2.5
-```
+### Etapa 1 — Variational Autoencoder (VAE — Parte 5)
+Treinar um modelo de **VAE** ($\mu_E, \sigma_E, \mu_D$) para comprimir as imagens $x \in \mathbb{R}^n$ ($28 \times 28 = 784$) em um espaço latente $\mathbb{R}^m$ ($m \ll n$):
+- **Encoder Probabilístico:**
+  $$Z(x) = \mu_E(x) + \sigma_E(x) W_E, \qquad W_E \sim \mathcal{N}(0, I)$$
+- **Decoder:**
+  $$\hat{x} = \mu_D(z)$$
+- **Função Objetivo do VAE (Slides 55–59 da Parte 5):**
+  $$\min_{\mu_D, \mu_E, \sigma_E} \sum_{i=1}^N \Big\{ R(x_i; \mu_D, \mu_E, \sigma_E) + L(x_i; \mu_D, \mu_E, \sigma_E) \Big\}$$
+  onde:
+  - **Erro de Reconstrução ($R$):**
+    $$R(x; \mu_D, \mu_E, \sigma_E) = \mathbb{E}_W \left[ \frac{\|x - \mu_D(\mu_E(x) + \sigma_E(x)W)\|^2}{2} \right]$$
+  - **Erro de Distribuição Latente ($L$):**
+    $$L(x; \mu_D, \mu_E, \sigma_E) = m \left( \frac{\sigma_E(x)^2 - 1}{2} - \ln(\sigma_E(x)) \right) + \frac{\|\mu_E(x)\|^2}{2}$$
+
+### Etapa 2 — Campo de Velocidade no Espaço Latente ($\Phi$ — Parte 6)
+Treinar uma rede neural que parametriza o **campo de velocidade ($\Phi$)** no espaço latente do VAE:
+- **Interpolação Retificada (Parametrização Forward $t \in [0, 1]$):**
+  - Ponto inicial (ruído latente em $t=0$): $z(0) \sim \mathcal{N}(0, I)$
+  - Ponto final (latente codificado em $t=1$): $z(1) = \mu_E(x)$ (ou amostrado do encoder)
+  - Caminho reto entre $z(0)$ e $z(1)$:
+    $$z(t) = (1 - t)\,z(0) + t\,z(1)$$
+- **Treinamento via Flow Matching:**
+  $$\min_{\theta} \frac{1}{M} \sum_{i=1}^M \left\| \Phi\big(z_i(t_i), t_i; \theta\big) - \big(z_i(1) - z_i(0)\big) \right\|^2$$
+
+### Etapa 3 — Geração de Novas Imagens (Amostragem)
+1. Amostrar um vetor latente inicial a partir da distribuição normal padrão:
+   $$z(0) \sim \mathcal{N}(0, I)$$
+2. Refinar esse vetor latente integrando a EDO $\frac{dz}{dt} = \Phi(z(t), t)$ de $t=0$ até $t=1$ (usando *Sampler* de **Euler** ou **Heun**), obtendo o latente final $z(1)$.
+3. Decodificar $z(1)$ com o decoder do VAE para obter a imagem gerada:
+   $$x = \mu_D(z(1))$$
+
+### Etapa 4 (Bônus: +5 Pontos) — Condicionamento & Classifier-Free Guidance (Parte 7)
+- Incluir um sinal de condicionamento $c \in \{0, 1, \dots, 35\}$ na rede de velocidade $\Phi(z, t, c)$ para controlar qual das **36 classes** (26 letras + 10 dígitos) será gerada.
+- Implementar **Classifier-Free Guidance (CFG)** combinando a predição condicional e incondicional ($\varnothing$) durante a amostragem:
+  $$v_{\text{CFG}}(z, t, c) = \Phi(z, t, \varnothing) + w \cdot \big(\Phi(z, t, c) - \Phi(z, t, \varnothing)\big)$$
 
 ---
 
-## Prazo e Instruções de Entrega
-- **Data limite:** **30/11/2026 às 23:59**
-- **E-mail:** `vinicius.marianog@gmail.com`
-- **Assunto do e-mail:** `[GENERATIVE AI-2026/2] {NOME DE UM INTEGRANTE DO GRUPO}`
-- **Entregáveis:** Link/arquivo do Google Colab + PDF da apresentação (apresentação online de 15 min em **01/12/2026**).
+## 3. Decisões de Engenharia do Grupo
+
+Fica a critério do grupo definir e experimentar:
+- Arquitetura das redes neurais do VAE ($\mu_E, \sigma_E, \mu_D$) e do campo de velocidade ($\Phi$)
+- Número de parâmetros e camadas
+- Dimensão $m$ do espaço latente
+- Hiperparâmetros de treinamento e método de integração numérica (*Euler* vs. *Heun*, número de passos $\Delta t$)
+
+---
+
+## 4. Prazos e Regras de Entrega
+
+| Evento | Data / Horário | Detalhes |
+| :--- | :---: | :--- |
+| **Entrega Final (Código + PDF)** | **30/11/2026 até 23:59** | Enviar **link/código no Google Colab** + **PDF da apresentação** por e-mail |
+| **Apresentação Online** | **01/12/2026** | Apresentação de **15 minutos** via Google Meet (em Português ou Inglês) |
+
+### Instruções de Envio do E-mail
+- **Destinatário:** [vinicius.marianog@gmail.com](mailto:vinicius.marianog@gmail.com) (enviado por apenas **um membro** do grupo)
+- **Assunto obrigatório do e-mail:**
+  ```text
+  [GENERATIVE AI-2026/2] {NOME DE UM INTEGRANTE DO GRUPO}
+  ```
+
+---
+
+## 5. Checklist de Tarefas para o Grupo
+
+- [ ] Cadastrar o grupo na [planilha oficial](https://docs.google.com/spreadsheets/d/1G2pjP_xNPxVwiSrMmVFaKX7bPj9JlPQ13X7mQiDTp4s/edit?usp=sharing)
+- [ ] Preparar o carregamento e pré-processamento do dataset **EMNIST (36 classes)** em PyTorch
+- [ ] Definir a arquitetura e treinar o **VAE** ($\mu_E, \sigma_E, \mu_D$)
+- [ ] Avaliar a qualidade de reconstrução e a organização do espaço latente do VAE
+- [ ] Definir a arquitetura e treinar o modelo de **Flow ($\Phi$)** no espaço latente
+- [ ] Implementar o *Sampler* ($z(0) \to z(1)$) e validar a geração $x = \mu_D(z(1))$
+- [ ] **(Bônus +5 pts)** Implementar o condicionamento nas 36 classes + **Classifier-Free Guidance (CFG)**
+- [ ] Consolidar o notebook final no **Google Colab**
+- [ ] Montar os slides da **apresentação em PDF** (15 min)
+- [ ] Enviar o e-mail até **30/11/2026 às 23:59**
