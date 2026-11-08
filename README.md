@@ -85,6 +85,8 @@ Fica a critério do grupo definir e experimentar:
 
 ## 5. Checklist de Tarefas para o Grupo
 
+> 📝 **Registre o que você fez no [CHANGELOG.md](CHANGELOG.md)** e marque seu nome na tabela "Em andamento" antes de pegar uma tarefa.
+
 - [ ] Cadastrar o grupo na [planilha oficial](https://docs.google.com/spreadsheets/d/1G2pjP_xNPxVwiSrMmVFaKX7bPj9JlPQ13X7mQiDTp4s/edit?usp=sharing)
 - [ ] Preparar o carregamento e pré-processamento do dataset **EMNIST (36 classes)** em PyTorch
 - [ ] Definir a arquitetura e treinar o **VAE** ($\mu_E, \sigma_E, \mu_D$)
