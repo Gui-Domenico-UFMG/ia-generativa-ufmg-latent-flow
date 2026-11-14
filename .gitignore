@@ -27,3 +27,4 @@ desktop.ini
 # Saídas de treino (checkpoints, latentes, figuras)
 outputs/
 *.pt
+*.log
