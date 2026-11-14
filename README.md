@@ -122,19 +122,37 @@ tools/build_notebook.py             # regera o notebook a partir de src/ (rode a
   ```
 
 ### Dataset
-Split `balanced` do EMNIST filtrado para os rótulos `0..35`: **86.400** imagens de treino e **14.400** de teste, 2.400/400 por classe.
+Split `balanced` do EMNIST (se o site do NIST falhar, o código baixa de um espelho no GitHub) filtrado para os rótulos `0..35`: **86.400** imagens de treino e **14.400** de teste, 2.400/400 por classe.
 Rótulo `0..9` → dígito, `10..35` → letra `A..Z` (`src.dataset.index_to_char`).
+
+### Resultados do treino (já no repositório, em `results/base_vae/`)
+Treino de 20 épocas (m = 16, β = 0.25, σ diagonal, 2,41M parâmetros), melhor época 19:
+
+| Métrica (teste) | Valor |
+| :--- | :---: |
+| Reconstrução R(x) = ‖x − x̂‖²/2 | **5,37** (MSE ≈ 0,0137 por pixel) |
+| Latente L(x) | 23,0 |
+| Dimensões ativas | **16/16** |
+| μ_E(x): média / desvio | −0,001 / 0,97 (já quase N(0, I), não precisa normalizar) |
+
+| Reconstruções | Amostras do VAE sozinho (baseline) |
+| :---: | :---: |
+| ![](results/base_vae/vae_reconstructions.png) | ![](results/base_vae/vae_prior_samples.png) |
+
+As reconstruções são nítidas e com o caractere certo. As amostras de N(0, I) sem Flow saem parecidas com caracteres, mas muitas ficam misturadas ou borradas: **é isso que o Flow precisa melhorar**. O PCA (`vae_latent_pca.png`) mostra as classes sobrepostas em 2D, o que é esperado com 16 dimensões e reforça a utilidade do condicionamento/CFG.
+
+> **Quem vai fazer o Flow não precisa treinar o VAE de novo:** use `results/base_vae/vae.pt` e `results/base_vae/latents.pt`.
 
 ### O que a base entrega para o Flow (Φ)
 | Arquivo | Conteúdo |
 | :--- | :--- |
-| `outputs/vae.pt` | pesos + config do VAE → `vae = load_vae("outputs/vae.pt", device)` |
-| `outputs/latents.pt` | `{"train": {"mu", "sigma", "y"}, "test": {...}, "latent_dim", "class_names", "mu_mean", "mu_std"}` |
+| `results/base_vae/vae.pt` | pesos + config do VAE → `vae = load_vae("results/base_vae/vae.pt", device)` |
+| `results/base_vae/latents.pt` | `{"train": {"mu", "sigma", "y"}, "test": {...}, "latent_dim", "class_names", "mu_mean", "mu_std"}` |
 
 ```python
 from src.vae import load_vae
-vae = load_vae("outputs/vae.pt", device)
-lat = torch.load("outputs/latents.pt")
+vae = load_vae("results/base_vae/vae.pt", device)
+lat = torch.load("results/base_vae/latents.pt")
 z1, y = lat["train"]["mu"], lat["train"]["y"]   # z(1) = μ_E(x) e classe c ∈ {0..35}
 x = vae.decode(z1_gerado)                       # x = μ_D(z(1))
 ```
