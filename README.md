@@ -97,3 +97,47 @@ Fica a critério do grupo definir e experimentar:
 - [ ] Consolidar o notebook final no **Google Colab**
 - [ ] Montar os slides da **apresentação em PDF** (15 min)
 - [ ] Enviar o e-mail até **30/11/2026 às 23:59**
+
+---
+
+## 6. Base do Projeto (Dados + VAE) — como usar
+
+### Estrutura
+```text
+src/dataset.py      # EMNIST com 36 classes ('0'-'9', 'A'-'Z'), imagens em [0, 1], orientação corrigida
+src/vae.py          # VAE (μ_E, σ_E, μ_D), loss R(x) + β·L(x), save_vae / load_vae / encode_dataset
+src/vis_vae.py      # figuras: reconstruções, amostras de N(0, I), interpolação, PCA do latente, curvas
+train_vae.py        # treina o VAE e exporta vae.pt + latents.pt + figuras para outputs/
+notebooks/01_base_dados_vae.ipynb   # mesma coisa, pronto para o Colab (autossuficiente)
+tools/build_notebook.py             # regera o notebook a partir de src/ (rode após mudar o código)
+```
+
+### Rodar
+- **Colab (recomendado):** abra `notebooks/01_base_dados_vae.ipynb`, escolha GPU e execute tudo.
+- **Linha de comando:**
+  ```bash
+  pip install -r requirements.txt
+  python train_vae.py                    # m=16, β=0.25, 30 épocas
+  python train_vae.py --fake --epochs 2  # teste rápido sem baixar o EMNIST
+  ```
+
+### Dataset
+Split `balanced` do EMNIST filtrado para os rótulos `0..35`: **86.400** imagens de treino e **14.400** de teste, 2.400/400 por classe.
+Rótulo `0..9` → dígito, `10..35` → letra `A..Z` (`src.dataset.index_to_char`).
+
+### O que a base entrega para o Flow (Φ)
+| Arquivo | Conteúdo |
+| :--- | :--- |
+| `outputs/vae.pt` | pesos + config do VAE → `vae = load_vae("outputs/vae.pt", device)` |
+| `outputs/latents.pt` | `{"train": {"mu", "sigma", "y"}, "test": {...}, "latent_dim", "class_names", "mu_mean", "mu_std"}` |
+
+```python
+from src.vae import load_vae
+vae = load_vae("outputs/vae.pt", device)
+lat = torch.load("outputs/latents.pt")
+z1, y = lat["train"]["mu"], lat["train"]["y"]   # z(1) = μ_E(x) e classe c ∈ {0..35}
+x = vae.decode(z1_gerado)                       # x = μ_D(z(1))
+```
+
+### Sobre o β
+`β = 1` é a fórmula exata do enunciado. Como $R(x) = \|x-\hat x\|^2/2$ com pixels em [0, 1] fica pequeno perto de $L(x)$, `β = 1` tende a borrar as imagens e desligar dimensões do latente. O padrão é `β = 0.25`. O notebook tem uma célula opcional que compara β ∈ {1, 0.25, 0.05}, útil para o slide de decisões de engenharia.
