@@ -11,6 +11,7 @@ Repositório do grupo para o **Trabalho Prático Final** da disciplina de **Inte
 - **Dataset:** **EMNIST** — variante contendo **36 classes** (`10 dígitos` de `0` a `9` + `26 letras` de `A` a `Z`).
 - **Framework obrigatório:** **PyTorch**.
 - **Tamanho do Grupo:** Até 3 integrantes.
+  - **Nosso grupo — Grupo 4:** João Paulo Lara, Fábio, Guilherme Martins Dijan Domenico.
   - **Planilha de Cadastro dos Grupos:** [Google Sheets Oficial](https://docs.google.com/spreadsheets/d/1G2pjP_xNPxVwiSrMmVFaKX7bPj9JlPQ13X7mQiDTp4s/edit?usp=sharing)
 
 ---
@@ -87,10 +88,10 @@ Fica a critério do grupo definir e experimentar:
 
 > 📝 **Registre o que você fez no [CHANGELOG.md](CHANGELOG.md)** e marque seu nome na tabela "Em andamento" antes de pegar uma tarefa.
 
-- [ ] Cadastrar o grupo na [planilha oficial](https://docs.google.com/spreadsheets/d/1G2pjP_xNPxVwiSrMmVFaKX7bPj9JlPQ13X7mQiDTp4s/edit?usp=sharing)
-- [ ] Preparar o carregamento e pré-processamento do dataset **EMNIST (36 classes)** em PyTorch
-- [ ] Definir a arquitetura e treinar o **VAE** ($\mu_E, \sigma_E, \mu_D$)
-- [ ] Avaliar a qualidade de reconstrução e a organização do espaço latente do VAE
+- [x] Cadastrar o grupo (**Grupo 4**) na [planilha oficial](https://docs.google.com/spreadsheets/d/1G2pjP_xNPxVwiSrMmVFaKX7bPj9JlPQ13X7mQiDTp4s/edit?usp=sharing)
+- [x] Preparar o carregamento e pré-processamento do dataset **EMNIST (36 classes)** em PyTorch
+- [x] Definir a arquitetura e treinar o **VAE** ($\mu_E, \sigma_E, \mu_D$)
+- [x] Avaliar a qualidade de reconstrução e a organização do espaço latente do VAE
 - [ ] Definir a arquitetura e treinar o modelo de **Flow ($\Phi$)** no espaço latente
 - [ ] Implementar o *Sampler* ($z(0) \to z(1)$) e validar a geração $x = \mu_D(z(1))$
 - [ ] **(Bônus +5 pts)** Implementar o condicionamento nas 36 classes + **Classifier-Free Guidance (CFG)**
