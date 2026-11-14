@@ -28,3 +28,6 @@ desktop.ini
 outputs/
 *.pt
 *.log
+
+# Resultados oficiais compartilhados com o grupo (checkpoint + latentes)
+!results/**/*.pt

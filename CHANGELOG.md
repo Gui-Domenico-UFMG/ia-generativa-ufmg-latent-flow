@@ -42,8 +42,8 @@ Coloque seu nome ao pegar uma tarefa; remova quando terminar (e registre no Regi
 | :--- | :--- | :--- |
 | Cadastrar o grupo na planilha | | ⬜ a fazer |
 | Dataloader EMNIST (36 classes) | Guilherme | ✅ concluído |
-| Arquitetura + treino do VAE | Guilherme | 🟨 código pronto; falta rodar no Colab com GPU |
-| Validação das reconstruções do VAE | Guilherme | 🟨 figuras prontas; avaliar após treino real |
+| Arquitetura + treino do VAE | Guilherme | ✅ concluído (`results/base_vae/`) |
+| Validação das reconstruções do VAE | Guilherme | ✅ concluído |
 | Arquitetura + treino do Flow (Φ) | | ⬜ a fazer |
 | Sampler z(0) → z(1) e geração x = μ_D(z(1)) | | ⬜ a fazer |
 | (Bônus) Condicionamento 36 classes + CFG | | ⬜ a fazer |
@@ -56,6 +56,13 @@ Status: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 ---
 
 ## Registro
+
+### 2026-11-14 — Guilherme
+- **Tarefa:** `[vae]` Treino real do VAE + entrega para o grupo
+- **O que foi feito:** VAE treinado no EMNIST-36 real (20 épocas, CPU, ~21 min). Checkpoint, latentes, figuras e log salvos no repositório. Download do EMNIST com espelho de reserva.
+- **Arquivos / links:** `results/base_vae/` (`vae.pt`, `latents.pt`, figuras, `metrics.json`, `train_log.txt`)
+- **Resultados:** teste R(x) = 5,37, L(x) = 23,0, 16/16 dimensões ativas, μ_E com média ≈ 0 e desvio ≈ 0,97. Reconstruções nítidas; amostras de N(0, I) sem Flow ainda misturadas (baseline).
+- **Próximos passos / pendências:** **m = 16 combinado.** Flow (Φ) pode começar direto de `results/base_vae/latents.pt`.
 
 ### 2026-11-14 — Guilherme
 - **Tarefa:** `[dados]` `[vae]` Base do projeto: dataloader EMNIST-36 + VAE

@@ -1,0 +1,27 @@
+Dispositivo: cpu
+Treino: 86400 imagens | Teste: 14400 imagens
+VAE: m=16, sigma diagonal, beta=0.25, 2.41M parâmetros
+[01/20] treino: loss 17.66 (R 12.71, L 19.80) | teste: loss 13.65 (R 8.16, L 21.98) | 60s
+[02/20] treino: loss 13.21 (R 7.63, L 22.29) | teste: loss 12.89 (R 7.22, L 22.68) | 119s
+[03/20] treino: loss 12.67 (R 7.03, L 22.56) | teste: loss 12.55 (R 7.03, L 22.09) | 177s
+[04/20] treino: loss 12.35 (R 6.68, L 22.66) | teste: loss 12.37 (R 6.74, L 22.52) | 235s
+[05/20] treino: loss 12.11 (R 6.43, L 22.71) | teste: loss 12.16 (R 6.57, L 22.32) | 295s
+[06/20] treino: loss 11.94 (R 6.24, L 22.78) | teste: loss 12.01 (R 6.23, L 23.13) | 355s
+[07/20] treino: loss 11.80 (R 6.10, L 22.80) | teste: loss 11.89 (R 6.18, L 22.84) | 416s
+[08/20] treino: loss 11.66 (R 5.96, L 22.82) | teste: loss 11.73 (R 5.98, L 22.99) | 477s
+[09/20] treino: loss 11.54 (R 5.83, L 22.83) | teste: loss 11.63 (R 5.90, L 22.92) | 539s
+[10/20] treino: loss 11.44 (R 5.73, L 22.84) | teste: loss 11.59 (R 5.83, L 23.04) | 600s
+[11/20] treino: loss 11.35 (R 5.63, L 22.88) | teste: loss 11.54 (R 5.80, L 22.97) | 665s
+[12/20] treino: loss 11.27 (R 5.54, L 22.90) | teste: loss 11.42 (R 5.73, L 22.78) | 732s
+[13/20] treino: loss 11.18 (R 5.45, L 22.92) | teste: loss 11.35 (R 5.62, L 22.94) | 797s
+[14/20] treino: loss 11.11 (R 5.38, L 22.95) | teste: loss 11.33 (R 5.51, L 23.26) | 862s
+[15/20] treino: loss 11.05 (R 5.31, L 22.94) | teste: loss 11.24 (R 5.48, L 23.06) | 926s
+[16/20] treino: loss 10.99 (R 5.25, L 22.96) | teste: loss 11.21 (R 5.49, L 22.87) | 989s
+[17/20] treino: loss 10.94 (R 5.19, L 22.98) | teste: loss 11.17 (R 5.42, L 23.00) | 1053s
+[18/20] treino: loss 10.90 (R 5.16, L 22.98) | teste: loss 11.14 (R 5.41, L 22.90) | 1115s
+[19/20] treino: loss 10.88 (R 5.13, L 22.99) | teste: loss 11.12 (R 5.37, L 23.00) | 1174s
+[20/20] treino: loss 10.86 (R 5.12, L 22.97) | teste: loss 11.13 (R 5.38, L 23.01) | 1235s
+Melhor época: 19 (loss de teste 11.12) -> ./outputs/vae.pt
+Latentes salvos em ./outputs/latents.pt: treino (86400, 16), teste (14400, 16)
+Estatísticas de mu_E(x): média -0.001, desvio 0.966, dimensões ativas 16/16
+Figuras e métricas em ./outputs/

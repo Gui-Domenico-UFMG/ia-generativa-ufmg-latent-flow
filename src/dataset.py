@@ -49,14 +49,47 @@ class TransposeEMNIST:
         return tensor.transpose(-2, -1).contiguous()
 
 
+# Cópia pública dos arquivos originais do NIST (usada só se o download oficial falhar).
+MIRROR_URL = "https://media.githubusercontent.com/media/aurelienduarte/emnist/master/gzip/"
+MIRROR_FILES = [f"emnist-balanced-{s}-ubyte" for s in
+                ("train-images-idx3", "train-labels-idx1", "test-images-idx3", "test-labels-idx1")]
+
+
+def download_from_mirror(data_dir: str = "./data") -> None:
+    """Baixa os 4 arquivos do split 'balanced' do espelho para data_dir/EMNIST/raw (formato do torchvision)."""
+    import gzip
+    import os
+    import shutil
+    import urllib.request
+
+    raw = os.path.join(data_dir, "EMNIST", "raw")
+    os.makedirs(raw, exist_ok=True)
+    for name in MIRROR_FILES:
+        dst = os.path.join(raw, name)
+        if os.path.exists(dst):
+            continue
+        print(f"Baixando {name}.gz do espelho...")
+        urllib.request.urlretrieve(MIRROR_URL + name + ".gz", dst + ".gz")
+        with gzip.open(dst + ".gz", "rb") as fin, open(dst, "wb") as fout:
+            shutil.copyfileobj(fin, fout)
+        os.remove(dst + ".gz")
+
+
 def get_emnist_36_datasets(data_dir: str = "./data") -> Tuple[Dataset, Dataset]:
     """Retorna (treino, teste) do EMNIST com as 36 classes, imagens em [0, 1] e orientação corrigida."""
     from torchvision import datasets, transforms
 
     transform = transforms.Compose([transforms.ToTensor(), TransposeEMNIST()])
 
-    train_full = datasets.EMNIST(root=data_dir, split="balanced", train=True, download=True, transform=transform)
-    test_full = datasets.EMNIST(root=data_dir, split="balanced", train=False, download=True, transform=transform)
+    def load(train: bool, download: bool):
+        return datasets.EMNIST(root=data_dir, split="balanced", train=train, download=download, transform=transform)
+
+    try:
+        train_full, test_full = load(True, True), load(False, True)
+    except Exception as e:  # site do NIST fora do ar ou bloqueado
+        print(f"Download oficial falhou ({type(e).__name__}); usando o espelho.")
+        download_from_mirror(data_dir)
+        train_full, test_full = load(True, False), load(False, False)
 
     train_idx = torch.where(train_full.targets < NUM_CLASSES)[0].tolist()
     test_idx = torch.where(test_full.targets < NUM_CLASSES)[0].tolist()
