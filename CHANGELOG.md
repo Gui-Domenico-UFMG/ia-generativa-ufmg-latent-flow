@@ -28,9 +28,11 @@ Tags úteis no título da tarefa: `[dados]`, `[vae]`, `[flow]`, `[sampler]`, `[c
 
 | Nome | GitHub | Responsabilidades principais |
 | :--- | :--- | :--- |
-| _a preencher_ | | |
-| _a preencher_ | | |
-| _a preencher_ | | |
+| Guilherme Martins Dijan Domenico | Gui-Domenico-UFMG | Base: dados EMNIST-36 + VAE ✅ |
+| João Paulo Lara | | _a combinar_: Flow (Φ) + sampler **ou** CFG + entrega |
+| Fábio | | _a combinar_: Flow (Φ) + sampler **ou** CFG + entrega |
+
+**Grupo 4** na [planilha oficial](https://docs.google.com/spreadsheets/d/1G2pjP_xNPxVwiSrMmVFaKX7bPj9JlPQ13X7mQiDTp4s/edit?usp=sharing).
 
 ---
 
@@ -40,15 +42,15 @@ Coloque seu nome ao pegar uma tarefa; remova quando terminar (e registre no Regi
 
 | Tarefa (checklist do README) | Responsável | Status |
 | :--- | :--- | :--- |
-| Cadastrar o grupo na planilha | | ⬜ a fazer |
+| Cadastrar o grupo na planilha | Grupo 4 | ✅ concluído |
 | Dataloader EMNIST (36 classes) | Guilherme | ✅ concluído |
 | Arquitetura + treino do VAE | Guilherme | ✅ concluído (`results/base_vae/`) |
 | Validação das reconstruções do VAE | Guilherme | ✅ concluído |
-| Arquitetura + treino do Flow (Φ) | | ⬜ a fazer |
+| Arquitetura + treino do Flow (Φ) — meta 22/11 | | ⬜ a fazer |
 | Sampler z(0) → z(1) e geração x = μ_D(z(1)) | | ⬜ a fazer |
-| (Bônus) Condicionamento 36 classes + CFG | | ⬜ a fazer |
-| Notebook final no Colab | | ⬜ a fazer |
-| Slides em PDF (15 min) | | ⬜ a fazer |
+| (Bônus) Condicionamento 36 classes + CFG — meta 25/11 | | ⬜ a fazer |
+| Notebook final no Colab — meta 28/11 | | ⬜ a fazer |
+| Slides em PDF (15 min) — meta 28/11 | | ⬜ a fazer |
 | Envio do e-mail (até 30/11 23:59) | | ⬜ a fazer |
 
 Status: ⬜ a fazer · 🟨 em andamento · ✅ concluído
@@ -56,6 +58,11 @@ Status: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 ---
 
 ## Registro
+
+### 2026-11-14 — Guilherme
+- **Tarefa:** `[entrega]` Cadastro do grupo
+- **O que foi feito:** grupo cadastrado na planilha oficial como **Grupo 4** (João Paulo Lara, Fábio, Guilherme Martins Dijan Domenico).
+- **Próximos passos / pendências:** João Paulo e Fábio combinarem quem pega o Flow (Φ) e quem pega o CFG + notebook + slides.
 
 ### 2026-11-14 — Guilherme
 - **Tarefa:** `[vae]` Treino real do VAE + entrega para o grupo
