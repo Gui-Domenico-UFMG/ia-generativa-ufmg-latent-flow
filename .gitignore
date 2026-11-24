@@ -26,6 +26,9 @@ desktop.ini
 
 # Saídas de treino (checkpoints, latentes, figuras)
 outputs/
+/cvae/
+/flow/
+/cfg_flow/
 *.pt
 *.log
 
