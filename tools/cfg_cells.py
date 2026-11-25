@@ -318,6 +318,31 @@ $w=1$ is the plain conditional field, larger $w$ gives more class-typical (and l
 
 plot_guidance_sweep(save_path=f"{CFG_DIR}/cfg_guidance_sweep.png")"""),
 
+    ("markdown", r"""**Unconditional pipeline of the assignment (Steps 2–3): $\Phi(z, t, \varnothing)$ + plain VAE decoder.**
+With $w = 0$ the network uses only the null token, so this is exactly the unconditional flow of the assignment:
+$z(0) \sim \mathcal{N}(0, I)$, integrate $dz/dt = \Phi(z, t, \varnothing)$ from $t=0$ to $t=1$ (Heun, 25 steps), then
+$x = \mu_D(z(1))$. Top: VAE alone, decoding $z \sim \mathcal{N}(0, I)$ directly (Section 4.2 baseline). Bottom: the
+**same** $z(0)$ transported by the flow before decoding. The flow turns the blurry hybrids into clean characters of random classes."""),
+
+    ("code", r"""@torch.no_grad()
+def plot_flow_vs_prior(n=16, seed=3, save_path=None, show=True):
+    g = torch.Generator().manual_seed(seed)
+    z0 = torch.randn(n, cfg_config["latent_dim"], generator=g)
+    x_prior = vae.decode(z0.to(device)).cpu()                                 # VAE alone: mu_D(z), z ~ N(0, I)
+    x_flow = generate_cfg(torch.zeros(n, dtype=torch.long), w=0.0, z0=z0)    # w = 0: label ignored
+    fig, axes = plt.subplots(2, n, figsize=(n * 0.6, 1.6))
+    for j in range(n):
+        for i, img in enumerate((x_prior[j], x_flow[j])):
+            axes[i, j].imshow(img[0], cmap="gray", vmin=0, vmax=1)
+            axes[i, j].set_xticks([]); axes[i, j].set_yticks([])
+    axes[0, 0].set_ylabel("VAE", fontsize=7, rotation=0, labelpad=14)
+    axes[1, 0].set_ylabel("flow", fontsize=7, rotation=0, labelpad=14)
+    fig.suptitle("Same z(0): decoded directly (top) vs. after the unconditional flow (bottom)", fontsize=9)
+    _finish(fig, save_path, show)
+
+
+plot_flow_vs_prior(save_path=f"{CFG_DIR}/uncond_flow_vs_prior.png")"""),
+
     ("markdown", r"""## 9.4 Quantitative check: does the generated character match the requested class?
 We train a small CNN classifier on the real EMNIST-36 training images and use it to classify generated images.
 **Class accuracy** = fraction of samples classified as the requested class $c$. We also report the mean
@@ -339,7 +364,8 @@ classifier accuracy on the real test set is the practical upper bound."""),
         return self.net(x)
 
 
-def train_classifier(train_loader, test_loader, epochs=3, device="cpu"):
+def train_classifier(train_loader, test_loader, epochs=3, device="cpu", seed=0):
+    torch.manual_seed(seed)   # fixed seed: the "judge" is the same in every run, so the numbers are reproducible
     clf = SmallCNN().to(device)
     opt = torch.optim.Adam(clf.parameters(), lr=1e-3)
     for epoch in range(epochs):

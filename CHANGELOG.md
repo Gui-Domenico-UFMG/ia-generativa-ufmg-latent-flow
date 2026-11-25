@@ -59,6 +59,12 @@ Status: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 ## Registro
 
 ### 2026-11-25 — Guilherme
+- **Tarefa:** `[cfg]` `[notebook]` Pipeline incondicional explícito + reprodutibilidade da avaliação
+- **O que foi feito:** nova célula na Seção 9.3 que mostra a Etapa 3 do enunciado isolada: Φ(z, t, ∅) (CFG com *w* = 0) + decoder do VAE, comparada com o VAE sozinho a partir do mesmo z(0). O classificador "juiz" da Seção 9.4 passou a ter semente fixa (antes os números variavam ~1 ponto por execução). A Seção 9 foi testada em CPU com os checkpoints de `results/` e roda sem erros.
+- **Arquivos / links:** `tools/cfg_cells.py`, `notebooks/final_task_refactored.ipynb` (regenerado com `tools/add_cfg_section.py`), `README.md`
+- **Próximos passos / pendências:** *Executar tudo* no Colab (T4) e salvar com as saídas; alinhar os números da Rota B nos slides com a Seção 9; enviar o e-mail até 30/11.
+
+### 2026-11-25 — Guilherme
 - **Tarefa:** `[cfg]` `[notebook]` Integração do CFG no notebook refatorado
 - **O que foi feito:** o João substituiu `final_task.ipynb` por `final_task_refactored.ipynb`, o que gerou conflito com a seção de CFG. O conflito foi resolvido aceitando o notebook refatorado, e o bônus virou a **Seção 9**, nas convenções dele: `CFG_DIR` e `TRAIN_CFG_FLOW` na Seção 0 (treinar ou carregar), subseções 9.1–9.5 e tabela de resultados. "Try it yourself" passou a ser a Seção 10 e "Summary" a 11 (com o item 6 sobre CFG). Índice, overview e badge do Colab atualizados.
 - **Arquivos / links:** `notebooks/final_task_refactored.ipynb`, `tools/cfg_cells.py`, `tools/add_cfg_section.py`
