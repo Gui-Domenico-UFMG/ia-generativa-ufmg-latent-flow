@@ -2,6 +2,16 @@
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gui-Domenico-UFMG/ia-generativa-ufmg-latent-flow/blob/main/notebooks/final_task_refactored.ipynb)
 
+### Acesso rápido
+
+| | Link |
+| :--- | :--- |
+| ▶️ **Notebook no Google Colab** | **<https://colab.research.google.com/github/Gui-Domenico-UFMG/ia-generativa-ufmg-latent-flow/blob/main/notebooks/final_task_refactored.ipynb>** |
+| 📓 Notebook no GitHub | [`notebooks/final_task_refactored.ipynb`](notebooks/final_task_refactored.ipynb) |
+| 📑 Slides da apresentação (PDF) | [`slides/Apresentacao_VAE_Rectified_Flow_EMNIST-36.pdf`](slides/Apresentacao_VAE_Rectified_Flow_EMNIST-36.pdf) |
+
+> No Colab, escolha *Ambiente de execução → Alterar tipo → GPU (T4)* e depois *Executar tudo*.
+
 Trabalho Prático Final de **Inteligência Artificial Generativa (UFMG, 2026/2)**, do Prof. Vinicius M. Gonçalves. Feito pelo **Grupo 4**: Guilherme Martins Dijan Domenico, João Paulo Lara Pinto e Fábio.
 
 Geramos caracteres manuscritos (`0–9`, `A–Z`) em três etapas: um **VAE** comprime as imagens 28×28 num latente de 16 dimensões, um **Rectified Flow** aprende a levar ruído $\mathcal N(0, I)$ até esse latente, e o decoder do VAE transforma o resultado em imagem. Como bônus, o campo de velocidade é **condicionado na classe** e amostrado com **Classifier-Free Guidance**.
@@ -75,6 +85,7 @@ results/base_vae/            # VAE de referência: pesos, latentes, métricas e 
 results/cfg_flow/            # flow condicional + CFG: pesos, métricas e figuras
 tools/cfg_cells.py           # código da seção de CFG (fonte das células do notebook)
 tools/add_cfg_section.py     # insere/atualiza a Seção 9 no notebook
+slides/                      # apresentação em PDF
 docs/enunciado.md            # resumo técnico do enunciado (equações, regras de entrega)
 docs/plano_de_ensino.md      # plano de ensino da disciplina
 legacy/                      # primeira versão em scripts (src/, train_vae.py), já não é necessária
@@ -99,5 +110,5 @@ CHANGELOG.md                 # quem fez o quê e quando
 - [x] Flow Φ(z, t) + samplers Euler e Heun
 - [x] **Bônus:** Φ(z, t, c) + Classifier-Free Guidance
 - [ ] Rodar *Executar tudo* no Colab com GPU e salvar o notebook com as saídas
-- [ ] Slides em PDF (15 min), salvos em `docs/`
+- [x] Slides em PDF (15 min): [`slides/`](slides/)
 - [ ] Enviar o e-mail até 30/11 às 23:59
