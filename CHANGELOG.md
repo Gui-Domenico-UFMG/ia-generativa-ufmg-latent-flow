@@ -59,6 +59,11 @@ Status: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 ## Registro
 
 ### 2026-11-25 — Guilherme
+- **Tarefa:** `[slides]` Rota B dos slides alinhada com a Seção 9 do notebook entregue
+- **O que foi feito:** os slides da Rota B vinham de outro notebook (rede 4 × 512, 2,43 M parâmetros, 97,9% com outro juiz). Foram refeitos com as figuras e números da execução no Colab: arquitetura Φ(z, t, c) com adaLN (0,97 M, p_uncond = 0,15), flow incondicional (w = 0) × VAE sozinho, grade das 36 classes (96,6% com w = 3), varredura de w e comparação de samplers. Tabelas "Rota A × Rota B" e "decisões" atualizadas; slide final só com o link do notebook/repositório; imagem "UFMG 2026" gerada de novo com o código da Seção 9; linha do slide 3 corrigida. Os apêndices que dependiam do outro notebook (flow matching, retidão, samplers, CFG, juiz/LDA) saíram; o do ELBO ficou. Agora são 24 slides.
+- **Arquivos / links:** `slides/Apresentacao_VAE_Rectified_Flow_EMNIST-36.pdf`
+
+### 2026-11-25 — Guilherme
 - **Tarefa:** `[notebook]` `[entrega]` *Executar tudo* no Colab (T4) + números finais
 - **O que foi feito:** notebook executado inteiro no Colab com GPU T4 e salvo com as saídas (commit `4da71ab`), sem erros. Números do bônus atualizados no README, na tabela da Seção 9.4 e no resumo (Seção 11). Corrigido o gráfico de loss do Flow (Seção 7.5), que não aparecia: `plot_loss_history` usava `plt.show()`, que não faz nada depois do `matplotlib.use("Agg")` da Seção 3.2. Agora usa `display(fig)`, como as outras funções de plot.
 - **Resultados:** classificador 90,4% no teste real; CFG com Heun 25 passos: *w* = 0 → 2,7%, *w* = 1 → 87,8%, *w* = 3 → **96,6%**, *w* = 5 → 97,6%. VAE: melhor época 180, teste R ≈ 5,0. CVAE: melhor época 191 (teste 9,24).
