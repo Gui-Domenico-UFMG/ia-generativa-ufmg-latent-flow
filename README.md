@@ -1,6 +1,6 @@
 # Latent Rectified Flow no EMNIST (36 classes)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gui-Domenico-UFMG/ia-generativa-ufmg-latent-flow/blob/main/notebooks/final_task.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Gui-Domenico-UFMG/ia-generativa-ufmg-latent-flow/blob/main/notebooks/final_task_refactored.ipynb)
 
 Trabalho Prático Final de **Inteligência Artificial Generativa (UFMG, 2026/2)**, do Prof. Vinicius M. Gonçalves. Feito pelo **Grupo 4**: Guilherme Martins Dijan Domenico, João Paulo Lara Pinto e Fábio.
 
@@ -22,11 +22,11 @@ x ──► Encoder ──► μ_E(x) = z(1) ─┐            z(0) ~ N(0, I)
 
 | Etapa | O que fizemos | Onde no notebook |
 | :--- | :--- | :--- |
-| Dados | EMNIST `balanced` filtrado para 36 classes: 86.400 imagens de treino e 14.400 de teste | *Functions to load…* |
-| VAE | CNN com m = 16, loss $R(x) + \beta L(x)$ do enunciado, β = 0,25 (com comparação de vários β) | *VAE training*, *β analysis* |
-| CVAE | Encoder e decoder recebem a classe (embedding), outra forma de controlar a geração | *CVAE training* |
-| Flow Φ(z, t) | MLP residual com embedding senoidal do tempo, flow matching, samplers Euler e Heun | *Latent Flow* |
-| **Bônus: Φ(z, t, c) + CFG** | Embedding de classe + token nulo, *label dropout* de 15%, $v = \Phi_\varnothing + w(\Phi_c - \Phi_\varnothing)$ | *Bonus (+5)* |
+| Dados | EMNIST `balanced` filtrado para 36 classes: 86.400 imagens de treino e 14.400 de teste | Seção 1 |
+| VAE | CNN com m = 16, loss $R(x) + \beta L(x)$ do enunciado, β = 0,25 (com comparação de vários β) | Seções 4 e 5 |
+| CVAE | Encoder e decoder recebem a classe (embedding), outra forma de controlar a geração | Seção 6 |
+| Flow Φ(z, t) | MLP residual com embedding senoidal do tempo, flow matching, samplers Euler e Heun, geração com o decoder do CVAE | Seções 7 e 8 |
+| **Bônus: Φ(z, t, c) + CFG** | Embedding de classe + token nulo, *label dropout* de 15%, $v = \Phi_\varnothing + w(\Phi_c - \Phi_\varnothing)$ | Seção 9 |
 
 ## Resultados
 
@@ -62,19 +62,19 @@ Sem o Flow, as amostras de $\mathcal N(0, I)$ saem misturadas ou borradas, porqu
 ## Como rodar
 
 1. Clique no badge **Open in Colab** e selecione *Ambiente de execução → Alterar tipo → GPU T4*.
-2. Rode *Ambiente de execução → Executar tudo*. O EMNIST é baixado automaticamente, com um espelho no GitHub caso o NIST esteja fora do ar.
+2. Rode *Ambiente de execução → Executar tudo*. Na Seção 0, `USE_GOOGLE_DRIVE = True` guarda os modelos no Drive, e as chaves `TRAIN_*` = `False` carregam modelos já treinados em vez de treinar de novo. O EMNIST é baixado automaticamente, com um espelho no GitHub caso o NIST esteja fora do ar.
 3. No final do notebook há dois widgets para digitar um caractere e gerar amostras: um usa o CVAE + flow, o outro usa o flow com CFG e um controle deslizante para *w*.
 
-Localmente: `pip install -r requirements.txt` e abra `notebooks/final_task.ipynb` no Jupyter.
+Localmente: `pip install -r requirements.txt` e abra `notebooks/final_task_refactored.ipynb` no Jupyter.
 
 ## Estrutura do repositório
 
 ```text
-notebooks/final_task.ipynb   # ENTREGA: notebook completo (dados, VAE, CVAE, Flow, CFG, widgets)
+notebooks/final_task_refactored.ipynb   # ENTREGA: notebook completo (dados, VAE, CVAE, Flow, CFG, widgets)
 results/base_vae/            # VAE de referência: pesos, latentes, métricas e figuras
 results/cfg_flow/            # flow condicional + CFG: pesos, métricas e figuras
 tools/cfg_cells.py           # código da seção de CFG (fonte das células do notebook)
-tools/add_cfg_section.py     # insere/atualiza essa seção no notebook
+tools/add_cfg_section.py     # insere/atualiza a Seção 9 no notebook
 docs/enunciado.md            # resumo técnico do enunciado (equações, regras de entrega)
 docs/plano_de_ensino.md      # plano de ensino da disciplina
 legacy/                      # primeira versão em scripts (src/, train_vae.py), já não é necessária

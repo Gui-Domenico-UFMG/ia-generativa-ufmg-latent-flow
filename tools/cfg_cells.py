@@ -1,20 +1,23 @@
 """Células da seção "Bônus: Flow condicional + Classifier-Free Guidance" do notebook final.
 
 Usado por `tools/add_cfg_section.py`, que insere estas células em
-`notebooks/final_task.ipynb` antes da seção "Try it yourself".
+`notebooks/final_task_refactored.ipynb` como Seção 9 (antes de "Try it yourself").
 Cada item é (tipo, fonte), com tipo "markdown" ou "code".
 """
 
 CELLS = [
-    ("markdown", r"""## Bonus (+5): Conditional Latent Flow + Classifier-Free Guidance
+    ("markdown", r"""---
+# 9. Bonus (+5): Class-conditional flow + Classifier-Free Guidance
 
-So far, class control came from the **CVAE decoder**, while the velocity field $\Phi(z, t)$ was unconditional.
+In Section 8, class control came from the **CVAE decoder**, while the velocity field $v_\theta(x, t)$ was unconditional.
 The assignment bonus (Part 7) asks for the conditioning signal **inside the flow**, $\Phi(z, t, c)$, plus
 **Classifier-Free Guidance (CFG)** at sampling time.
 
-**Setup.** We use the latents of the **unconditional VAE** (`outputs/latents.pt`): here the class information
-lives in $z$ itself, so the flow must learn to steer each sample to the right class region.
-In this section we follow the course convention (forward parametrization):
+**Setup.** We use the latents of the **unconditional VAE** (Section 4, `VAE_DIR/latents.pt`): there the class
+information lives in $z$ itself (see its PCA), so the flow alone must steer each sample to the right class region,
+and the plain VAE decoder $\mu_D(z)$ turns it into an image.
+Note: this section follows the **course convention** (forward parametrization, noise at $t=0$), the opposite
+time direction of Section 7:
 
 - $z(0) \sim \mathcal{N}(0, I)$ (noise), $\; z(1) = \mu_E(x)$ (data, standardized per dimension)
 - $z(t) = (1-t)\,z(0) + t\,z(1)$, target velocity $z(1) - z(0)$
@@ -28,6 +31,11 @@ $$\min_\theta \; \mathbb{E}\,\big\| \Phi(z(t), t, \tilde c;\theta) - (z(1) - z(0
 $$v_{\text{CFG}}(z, t, c) = \Phi(z, t, \varnothing) + w \,\big(\Phi(z, t, c) - \Phi(z, t, \varnothing)\big)$$
 $w = 0$ is unconditional, $w = 1$ is plain conditional, $w > 1$ pushes harder towards class $c$.
 Finally $x = \mu_D(z(1))$ with the VAE decoder."""),
+
+    ("markdown", r"""## 9.1 Conditional velocity network
+Same idea as Section 7.2 (residual MLP + sinusoidal time embedding), with two changes: a **class embedding**
+(37 entries: 36 classes + $\varnothing$) added to the time embedding, and **adaLN** blocks, where this
+(time + class) vector produces a per-layer scale, shift and gate. The gates start at zero, so each block starts as the identity."""),
 
     ("code", r"""import math
 import torch
@@ -153,6 +161,11 @@ class CFGRectifiedFlow(nn.Module):
         out = self.denormalize(z)
         return (out, traj) if return_trajectory else out"""),
 
+    ("markdown", r"""## 9.2 Training
+AdamW + cosine schedule, gradient clipping, and an **EMA** copy of the weights (decay 0.999), which is used for sampling.
+The latents are standardized per dimension, and `sample()` undoes this before decoding.
+> With `TRAIN_CFG_FLOW = False` (Section 0), the cell below loads `cfg_flow.pt` from `CFG_DIR` instead of training."""),
+
     ("code", r"""import copy
 import time
 from pathlib import Path
@@ -215,25 +228,28 @@ def load_cfg_flow(path, device="cpu"):
 
     ("code", r"""# CFG FLOW PARAMETERS
 cfg_config = dict(latent_dim=16, hidden_dim=256, cond_dim=128, num_blocks=4, num_classes=36)
-cfg_epochs = 100        # ~5 min on a Colab T4
+cfg_epochs = 100        # ~5 min on CPU, faster on a T4
 cfg_batch_size = 512
 cfg_lr = 1e-3
 p_uncond = 0.15
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 torch.manual_seed(42)
 
-# Unconditional VAE latents (exported in the "VAE training" section) + the VAE itself as decoder
-vae_latents = torch.load("outputs/latents.pt", map_location="cpu", weights_only=False)
-vae = load_vae("outputs/vae.pt", device=device)
-cfg_train_loader, cfg_test_loader = get_latent_dataloaders("outputs/latents.pt", batch_size=cfg_batch_size)
+# Unconditional VAE (Section 4) as decoder + its latents as training data
+vae = load_vae(f"{VAE_DIR}/vae.pt", device=device)
+vae_latents = torch.load(f"{VAE_DIR}/latents.pt", map_location="cpu", weights_only=False)
+cfg_train_loader, cfg_test_loader = get_latent_dataloaders(f"{VAE_DIR}/latents.pt", batch_size=cfg_batch_size)
 
-cfg_flow = CFGRectifiedFlow(ConditionalVelocityNet(**cfg_config),
-                            vae_latents["mu_mean"], vae_latents["mu_std"]).to(device)
-print(f"Phi(z, t, c): {sum(p.numel() for p in cfg_flow.parameters()) / 1e6:.2f}M parameters")
-
-cfg_flow, cfg_history = train_cfg_flow(cfg_flow, cfg_train_loader, cfg_test_loader, epochs=cfg_epochs,
-                                       lr=cfg_lr, p_uncond=p_uncond, device=device)
-save_cfg_flow(cfg_flow, "cfg_flow/cfg_flow.pt", cfg_config, cfg_history)"""),
+if TRAIN_CFG_FLOW:
+    cfg_flow = CFGRectifiedFlow(ConditionalVelocityNet(**cfg_config),
+                                vae_latents["mu_mean"], vae_latents["mu_std"]).to(device)
+    print(f"Phi(z, t, c): {sum(p.numel() for p in cfg_flow.parameters()) / 1e6:.2f}M parameters")
+    cfg_flow, cfg_history = train_cfg_flow(cfg_flow, cfg_train_loader, cfg_test_loader, epochs=cfg_epochs,
+                                           lr=cfg_lr, p_uncond=p_uncond, device=device)
+    save_cfg_flow(cfg_flow, f"{CFG_DIR}/cfg_flow.pt", cfg_config, cfg_history)
+else:
+    cfg_flow, _ckpt = load_cfg_flow(f"{CFG_DIR}/cfg_flow.pt", device=device)
+    cfg_history = _ckpt["history"]
+    print(f"Loaded {CFG_DIR}/cfg_flow.pt")"""),
 
     ("code", r"""fig, ax = plt.subplots(figsize=(6, 3.5))
 ax.plot(cfg_history["train_loss"], label="train")
@@ -242,9 +258,11 @@ ax.set_xlabel("epoch")
 ax.set_ylabel("flow matching MSE")
 ax.set_title("Conditional velocity field $\\Phi(z,t,c)$")
 ax.legend()
-_finish(fig, "cfg_flow/cfg_loss_curves.png", show=True)"""),
+_finish(fig, f"{CFG_DIR}/cfg_loss_curves.png", show=True)"""),
 
-    ("markdown", r"""### All 36 classes with CFG
+    ("markdown", r"""## 9.3 Results
+
+**All 36 classes with CFG.**
 Each row is one class; every column starts from a different noise $z(0)$. Heun, 25 steps, $w = 3$."""),
 
     ("code", r"""@torch.no_grad()
@@ -272,9 +290,9 @@ def plot_class_grid(w=3.0, per_class=10, seed=0, save_path=None, show=True):
     _finish(fig, save_path, show)
 
 
-plot_class_grid(w=3.0, save_path="cfg_flow/cfg_all_classes_w3.png")"""),
+plot_class_grid(w=3.0, save_path=f"{CFG_DIR}/cfg_all_classes_w3.png")"""),
 
-    ("markdown", r"""### Effect of the guidance scale $w$
+    ("markdown", r"""**Effect of the guidance scale $w$.**
 Same initial noise $z(0)$ for every column; only $w$ changes. $w=0$ ignores the label (unconditional sample),
 $w=1$ is the plain conditional field, larger $w$ gives more class-typical (and less diverse) characters."""),
 
@@ -298,9 +316,9 @@ $w=1$ is the plain conditional field, larger $w$ gives more class-typical (and l
     _finish(fig, save_path, show)
 
 
-plot_guidance_sweep(save_path="cfg_flow/cfg_guidance_sweep.png")"""),
+plot_guidance_sweep(save_path=f"{CFG_DIR}/cfg_guidance_sweep.png")"""),
 
-    ("markdown", r"""### Quantitative check: does the generated character match the requested class?
+    ("markdown", r"""## 9.4 Quantitative check: does the generated character match the requested class?
 We train a small CNN classifier on the real EMNIST-36 training images and use it to classify generated images.
 **Class accuracy** = fraction of samples classified as the requested class $c$. We also report the mean
 classifier confidence and the pixel-space diversity (mean std across samples of the same class).
@@ -366,7 +384,7 @@ for r in cfg_results:
     print(f"{r['method']:>8} {r['steps']:>5} {r['w']:>4g} | {r['class_acc']:>9.3f} {r['confidence']:>10.3f} {r['diversity']:>9.3f}")
 print(f"(classifier on real test images: {real_acc:.3f})")
 
-with open("cfg_flow/cfg_metrics.json", "w") as f:
+with open(f"{CFG_DIR}/cfg_metrics.json", "w") as f:
     json.dump({"classifier_real_test_acc": real_acc, "results": cfg_results}, f, indent=2)
 
 sweep = [r for r in cfg_results if r["method"] == "heun" and r["steps"] == 25]
@@ -381,10 +399,28 @@ h1, l1 = ax1.get_legend_handles_labels()
 h2, l2 = ax2.get_legend_handles_labels()
 ax1.legend(h1 + h2, l1 + l2, loc="center right", fontsize=8)
 ax1.set_title("CFG: fidelity vs. diversity")
-_finish(fig, "cfg_flow/cfg_accuracy_vs_w.png", show=True)"""),
+_finish(fig, f"{CFG_DIR}/cfg_accuracy_vs_w.png", show=True)"""),
 
-    ("markdown", r"""### Try it yourself (CFG)
-Type a character and choose the guidance scale $w$."""),
+    ("markdown", r"""**Results from our run** (100 epochs, 100 samples per class; classifier: 89.8% on real test images):
+
+| Sampler | Steps | $w$ | Class accuracy | Confidence | Diversity |
+|---|---|---|---|---|---|
+| Heun | 25 | 0 (unconditional) | 2.6% (chance = 2.8%) | 0.03 | 0.208 |
+| Heun | 25 | 1 (plain conditional) | 87.6% | 0.83 | 0.171 |
+| Heun | 25 | 2 | 96.4% | 0.93 | 0.166 |
+| Heun | 25 | **3** | **97.7%** | 0.94 | 0.168 |
+| Heun | 25 | 5 | 98.6% | 0.95 | 0.175 |
+| Euler | 10 | 3 | 97.8% | 0.94 | 0.154 |
+| Euler | 50 | 3 | 97.8% | 0.94 | 0.165 |
+| Heun | 5 | 3 | 97.7% | 0.94 | 0.166 |
+
+- **CFG works:** with $w=0$ the label is ignored (chance-level accuracy). $w=1$ already reaches 88%, and $w \ge 2$ exceeds 96%, above the classifier's accuracy on *real* images, because guidance produces more class-typical characters.
+- **Trade-off:** larger $w$ trades diversity for fidelity; $w \approx 2$–$3$ is a good balance.
+- **Few steps suffice:** the rectified paths are nearly straight, so 5 Heun steps or 10 Euler steps match 50 steps."""),
+
+    ("markdown", r"""## 9.5 Try it yourself (CFG)
+Type a character and choose the guidance scale $w$.
+> Requires the VAE (Section 4) and the CFG flow (Section 9.2) in the current runtime."""),
 
     ("code", r"""import ipywidgets as widgets
 from IPython.display import display, clear_output

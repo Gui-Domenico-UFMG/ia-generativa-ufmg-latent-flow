@@ -1,7 +1,12 @@
-"""Insere no notebook final: badge do Colab, célula de setup e a seção de CFG.
+"""Insere a Seção 9 (bônus: flow condicional + CFG) no notebook final.
 
 Uso (na raiz do repo):  python tools/add_cfg_section.py
-Idempotente: se a seção já existir, ela é substituída pela versão de tools/cfg_cells.py.
+Alvo: notebooks/final_task_refactored.ipynb. O script:
+  - coloca o badge do Colab no título;
+  - acrescenta CFG_DIR e TRAIN_CFG_FLOW na célula de setup (Seção 0);
+  - insere as células de tools/cfg_cells.py como Seção 9, antes de "Try it yourself";
+  - renumera "Try it yourself" (10) e "Summary of findings" (11), e atualiza índice, overview e resumo.
+É idempotente: rodar de novo substitui a Seção 9 pela versão atual de tools/cfg_cells.py.
 """
 import json
 import os
@@ -10,19 +15,11 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from cfg_cells import CELLS  # noqa: E402
 
-NB = os.path.join(os.path.dirname(__file__), "..", "notebooks", "final_task.ipynb")
-MARK = "## Bonus (+5): Conditional Latent Flow"
-SETUP_MARK = "# SETUP"
+NB = os.path.join(os.path.dirname(__file__), "..", "notebooks", "final_task_refactored.ipynb")
+MARK = "# 9. Bonus (+5)"
 BADGE = ("[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)]"
          "(https://colab.research.google.com/github/Gui-Domenico-UFMG/ia-generativa-ufmg-latent-flow/"
-         "blob/main/notebooks/final_task.ipynb)")
-SETUP = """# SETUP: output folders used by the cells below (run this first)
-import os
-for d in ("data", "outputs", "cvae", "flow", "cfg_flow"):
-    os.makedirs(d, exist_ok=True)
-
-import torch
-print("PyTorch", torch.__version__, "| GPU:", torch.cuda.get_device_name(0) if torch.cuda.is_available() else "none")"""
+         "blob/main/notebooks/final_task_refactored.ipynb)")
 
 
 def lines(src):
@@ -41,35 +38,69 @@ def text(cell):
     return "".join(cell["source"])
 
 
+def find(pred):
+    return next(i for i, c in enumerate(cells) if pred(c))
+
+
+def edit(i, old, new):
+    """Substitui old por new na célula i (nada a fazer se new já estiver lá)."""
+    src = text(cells[i])
+    if new in src:
+        return
+    assert old in src, f"célula {i}: trecho não encontrado: {old[:60]!r}"
+    cells[i]["source"] = lines(src.replace(old, new, 1))
+
+
 nb = json.load(open(NB, encoding="utf-8"))
 cells = nb["cells"]
 
-# 1) badge do Colab no título
+# título: badge do Colab
 if "colab-badge" not in text(cells[0]):
     cells[0]["source"] = lines(BADGE + "\n\n" + text(cells[0]))
 
-# 1b) introdução: menciona o bônus
-INTRO_ITEM = ("4.   **Bonus — Classifier-Free Guidance:** a class-conditional velocity field $\\Phi(z, t, c)$ trained "
-              "with label dropout on the unconditional VAE latents, sampled with CFG.")
-if "Classifier-Free Guidance" not in text(cells[1]):
-    src = text(cells[1])
-    anchor = "class-specific character generation."
-    cells[1]["source"] = lines(src.replace(anchor, anchor + "\n" + INTRO_ITEM, 1))
+# overview: menciona o bônus
+ov = find(lambda c: text(c).startswith("## Overview"))
+edit(ov, "This is the same recipe used by large-scale latent diffusion models",
+     "**Bonus (Section 9):** a second, *class-conditional* flow $\\Phi(z, t, c)$ on the unconditional VAE latents, "
+     "sampled with **Classifier-Free Guidance**, so the class is chosen by the flow itself.\n\n"
+     "This is the same recipe used by large-scale latent diffusion models")
 
-# 2) célula de setup logo após a introdução
-if not any(c["cell_type"] == "code" and text(c).startswith(SETUP_MARK) for c in cells):
-    cells.insert(2, make("code", SETUP))
+# índice
+toc = find(lambda c: text(c).startswith("### Table of contents"))
+edit(toc, "9. **Interactive demo**\n10. **Summary of findings**",
+     "9. **Bonus: conditional flow + Classifier-Free Guidance** — $\\Phi(z, t, c)$, guidance scale, classifier-based evaluation\n"
+     "10. **Interactive demo**\n11. **Summary of findings**")
 
-# 3) seção de CFG (remove versão anterior, se houver) antes de "Try it yourself"
-start = next((i for i, c in enumerate(cells) if text(c).strip().startswith(MARK)), None)
+# setup: pasta e chave do bônus
+setup = find(lambda c: c["cell_type"] == "code" and "TRAIN_FLOW = True" in text(c))
+edit(setup, 'FLOW_DIR = os.path.join(BASE_DIR, "flow")     # rectified flow\n',
+     'FLOW_DIR = os.path.join(BASE_DIR, "flow")     # rectified flow\n'
+     'CFG_DIR = os.path.join(BASE_DIR, "cfg_flow")  # bonus: class-conditional flow + CFG (Section 9)\n')
+edit(setup, "for d in (VAE_DIR, CVAE_DIR, FLOW_DIR):", "for d in (VAE_DIR, CVAE_DIR, FLOW_DIR, CFG_DIR):")
+edit(setup, "TRAIN_FLOW = True\n", "TRAIN_FLOW = True\nTRAIN_CFG_FLOW = True\n")
+
+# renumera as seções finais
+demo = find(lambda c: "Try it yourself" in text(c) and text(c).lstrip("-\n ").startswith("# "))
+edit(demo, "# 9. Try it yourself", "# 10. Try it yourself")
+summ = find(lambda c: "Summary of findings" in text(c) and c["cell_type"] == "markdown" and "# 1" in text(c)
+            and not text(c).startswith("### Table"))
+edit(summ, "# 10. Summary of findings", "# 11. Summary of findings")
+edit(summ, "\n\n**Possible extensions:**",
+     "\n6. **Classifier-Free Guidance moves class control into the flow** (bonus). On the *unconditional* VAE latents, "
+     "$\\Phi(z, t, c)$ with label dropout reaches **97.7%** class accuracy at $w = 3$ (chance-level at $w = 0$, 87.6% at "
+     "$w = 1$), measured by a CNN trained on real EMNIST; larger $w$ trades diversity for fidelity (Section 9)."
+     "\n\n**Possible extensions:**")
+edit(summ, "a class-conditional flow (with classifier-free guidance); quantitative sample metrics (e.g. accuracy of a "
+           "pretrained EMNIST classifier on the generated samples, or FID)",
+     "FID or other distribution-level sample metrics; CFG on top of the CVAE latents")
+
+# Seção 9: remove a versão anterior (se houver) e insere antes de "Try it yourself"
+start = next((i for i, c in enumerate(cells) if MARK in text(c)), None)
 if start is not None:
-    end = start + len(CELLS)
-    del cells[start:end]
-    pos = start
-else:
-    pos = next(i for i, c in enumerate(cells) if "Try it yourself" in text(c) and c["cell_type"] == "markdown")
+    del cells[start:find(lambda c: "# 10. Try it yourself" in text(c))]
+pos = find(lambda c: "# 10. Try it yourself" in text(c))
 cells[pos:pos] = [make(k, s) for k, s in CELLS]
 
 with open(NB, "w", encoding="utf-8") as f:
     json.dump(nb, f, ensure_ascii=False, indent=2)  # mesmo formato que o Colab salva
-print(f"OK: {len(cells)} células; seção CFG em {pos}..{pos + len(CELLS) - 1}")
+print(f"OK: {len(cells)} células; Seção 9 em {pos}..{pos + len(CELLS) - 1}")
