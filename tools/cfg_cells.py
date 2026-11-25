@@ -427,20 +427,20 @@ ax1.legend(h1 + h2, l1 + l2, loc="center right", fontsize=8)
 ax1.set_title("CFG: fidelity vs. diversity")
 _finish(fig, f"{CFG_DIR}/cfg_accuracy_vs_w.png", show=True)"""),
 
-    ("markdown", r"""**Results from our run** (100 epochs, 100 samples per class; classifier: 89.8% on real test images):
+    ("markdown", r"""**Results from our run** (full *Run all* on a Colab T4: VAE of Section 4 with 200 epochs, CFG flow with 100 epochs, 100 samples per class; classifier: 90.4% on real test images):
 
 | Sampler | Steps | $w$ | Class accuracy | Confidence | Diversity |
 |---|---|---|---|---|---|
-| Heun | 25 | 0 (unconditional) | 2.6% (chance = 2.8%) | 0.03 | 0.208 |
-| Heun | 25 | 1 (plain conditional) | 87.6% | 0.83 | 0.171 |
-| Heun | 25 | 2 | 96.4% | 0.93 | 0.166 |
-| Heun | 25 | **3** | **97.7%** | 0.94 | 0.168 |
-| Heun | 25 | 5 | 98.6% | 0.95 | 0.175 |
-| Euler | 10 | 3 | 97.8% | 0.94 | 0.154 |
-| Euler | 50 | 3 | 97.8% | 0.94 | 0.165 |
-| Heun | 5 | 3 | 97.7% | 0.94 | 0.166 |
+| Heun | 25 | 0 (unconditional) | 2.7% (chance = 2.8%) | 0.03 | 0.214 |
+| Heun | 25 | 1 (plain conditional) | 87.8% | 0.84 | 0.175 |
+| Heun | 25 | 2 | 95.6% | 0.93 | 0.171 |
+| Heun | 25 | **3** | **96.6%** | 0.94 | 0.173 |
+| Heun | 25 | 5 | 97.6% | 0.94 | 0.180 |
+| Euler | 10 | 3 | 96.9% | 0.95 | 0.159 |
+| Euler | 50 | 3 | 96.7% | 0.94 | 0.170 |
+| Heun | 5 | 3 | 96.6% | 0.94 | 0.170 |
 
-- **CFG works:** with $w=0$ the label is ignored (chance-level accuracy). $w=1$ already reaches 88%, and $w \ge 2$ exceeds 96%, above the classifier's accuracy on *real* images, because guidance produces more class-typical characters.
+- **CFG works:** with $w=0$ the label is ignored (chance-level accuracy). $w=1$ already reaches 88%, and $w \ge 2$ reaches about 96–98%, above the classifier's accuracy on *real* images, because guidance produces more class-typical characters.
 - **Trade-off:** larger $w$ trades diversity for fidelity; $w \approx 2$–$3$ is a good balance.
 - **Few steps suffice:** the rectified paths are nearly straight, so 5 Heun steps or 10 Euler steps match 50 steps."""),
 

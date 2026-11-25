@@ -87,7 +87,7 @@ summ = find(lambda c: "Summary of findings" in text(c) and c["cell_type"] == "ma
 edit(summ, "# 10. Summary of findings", "# 11. Summary of findings")
 edit(summ, "\n\n**Possible extensions:**",
      "\n6. **Classifier-Free Guidance moves class control into the flow** (bonus). On the *unconditional* VAE latents, "
-     "$\\Phi(z, t, c)$ with label dropout reaches **97.7%** class accuracy at $w = 3$ (chance-level at $w = 0$, 87.6% at "
+     "$\\Phi(z, t, c)$ with label dropout reaches **96.6%** class accuracy at $w = 3$ (chance-level at $w = 0$, 87.8% at "
      "$w = 1$), measured by a CNN trained on real EMNIST; larger $w$ trades diversity for fidelity (Section 9)."
      "\n\n**Possible extensions:**")
 edit(summ, "a class-conditional flow (with classifier-free guidance); quantitative sample metrics (e.g. accuracy of a "

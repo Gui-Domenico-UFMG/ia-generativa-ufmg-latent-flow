@@ -41,23 +41,23 @@ x ──► Encoder ──► μ_E(x) = z(1) ─┐            z(0) ~ N(0, I)
 
 ## Resultados
 
-**Bônus: flow condicional + CFG** (`results/cfg_flow/`). Φ(z, t, c) com 0,97M parâmetros, 100 épocas nos latentes do VAE (~5 min de CPU). Um CNN treinado no EMNIST real (acurácia de **89,8%** no teste real) classifica 3.600 amostras geradas (100 por classe):
+**Bônus: flow condicional + CFG.** Números da execução completa do notebook (*Executar tudo* no Colab com T4): Φ(z, t, c) com 0,97M parâmetros, 100 épocas nos latentes do VAE de 200 épocas da Seção 4. Um CNN treinado no EMNIST real (acurácia de **90,4%** no teste real) classifica 3.600 amostras geradas (100 por classe):
 
 | Sampler | Passos | *w* | Acurácia de classe | Confiança | Diversidade |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| Heun | 25 | 0 (incondicional) | 2,6% (acaso = 2,8%) | 0,03 | 0,208 |
-| Heun | 25 | 1 (condicional puro) | 87,6% | 0,83 | 0,171 |
-| Heun | 25 | 2 | 96,4% | 0,93 | 0,166 |
-| Heun | 25 | **3** | **97,7%** | 0,94 | 0,168 |
-| Heun | 25 | 5 | 98,6% | 0,95 | 0,175 |
-| Euler | 10 | 3 | 97,8% | 0,94 | 0,154 |
-| Euler | 50 | 3 | 97,8% | 0,94 | 0,165 |
-| Heun | 5 | 3 | 97,7% | 0,94 | 0,166 |
+| Heun | 25 | 0 (incondicional) | 2,7% (acaso = 2,8%) | 0,03 | 0,214 |
+| Heun | 25 | 1 (condicional puro) | 87,8% | 0,84 | 0,175 |
+| Heun | 25 | 2 | 95,6% | 0,93 | 0,171 |
+| Heun | 25 | **3** | **96,6%** | 0,94 | 0,173 |
+| Heun | 25 | 5 | 97,6% | 0,94 | 0,180 |
+| Euler | 10 | 3 | 96,9% | 0,95 | 0,159 |
+| Euler | 50 | 3 | 96,7% | 0,94 | 0,170 |
+| Heun | 5 | 3 | 96,6% | 0,94 | 0,170 |
 
-- **O CFG funciona:** com *w* = 0 a classe é ignorada (acurácia no nível do acaso). Com *w* = 1 já acerta 88%, e com *w* ≥ 2 passa de 96%, acima até das imagens reais, porque o guidance gera versões mais "típicas" de cada caractere.
+- **O CFG funciona:** com *w* = 0 a classe é ignorada (acurácia no nível do acaso). Com *w* = 1 já acerta 88%, e com *w* ≥ 2 fica entre 96% e 98%, acima até das imagens reais, porque o guidance gera versões mais "típicas" de cada caractere.
 - **Custo:** *w* maior troca diversidade por fidelidade. O ponto de equilíbrio fica em *w* ≈ 2–3.
 - **Sampler:** como o caminho do Rectified Flow é quase reto, 5 passos de Heun ou 10 de Euler já bastam.
-- **Reprodutibilidade:** o classificador "juiz" agora é treinado com semente fixa. Sem ela, os números variavam cerca de 1 ponto entre execuções (numa execução de conferência: 96,7% com *w* = 3). A rodada final no Colab usa o VAE de 200 épocas da Seção 4, então os valores podem diferir um pouco desta tabela.
+- **Reprodutibilidade:** o classificador "juiz" é treinado com semente fixa, então os números se repetem na mesma máquina (GPU e CPU dão diferenças de ~1 ponto). As figuras de `results/cfg_flow/` vêm de uma rodada anterior em CPU, com o VAE de 20 épocas de `results/base_vae/`.
 
 | Efeito do guidance *w* (mesmo z(0) em cada coluna) | Fidelidade × diversidade |
 | :---: | :---: |
@@ -111,6 +111,6 @@ CHANGELOG.md                 # quem fez o quê e quando
 - [x] CVAE
 - [x] Flow Φ(z, t) + samplers Euler e Heun
 - [x] **Bônus:** Φ(z, t, c) + Classifier-Free Guidance
-- [ ] Rodar *Executar tudo* no Colab com GPU e salvar o notebook com as saídas
+- [x] Rodar *Executar tudo* no Colab com GPU e salvar o notebook com as saídas
 - [x] Slides em PDF (15 min): [`slides/`](slides/)
 - [ ] Enviar o e-mail até 30/11 às 23:59
