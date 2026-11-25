@@ -28,9 +28,9 @@ Tags úteis no título da tarefa: `[dados]`, `[vae]`, `[flow]`, `[sampler]`, `[c
 
 | Nome | GitHub | Responsabilidades principais |
 | :--- | :--- | :--- |
-| Guilherme Martins Dijan Domenico | Gui-Domenico-UFMG | Base: dados EMNIST-36 + VAE ✅ |
-| João Paulo Lara | | _a combinar_: Flow (Φ) + sampler **ou** CFG + entrega |
-| Fábio | | _a combinar_: Flow (Φ) + sampler **ou** CFG + entrega |
+| Guilherme Martins Dijan Domenico | Gui-Domenico-UFMG | Dados EMNIST-36 + VAE ✅ · CFG (bônus) ✅ · organização do repo |
+| João Paulo Lara Pinto | joaopaulolarap | Notebook final: CVAE, análise de β, Flow Φ + samplers ✅ |
+| Fábio | | _a combinar_: slides + entrega |
 
 **Grupo 4** na [planilha oficial](https://docs.google.com/spreadsheets/d/1G2pjP_xNPxVwiSrMmVFaKX7bPj9JlPQ13X7mQiDTp4s/edit?usp=sharing).
 
@@ -44,12 +44,11 @@ Coloque seu nome ao pegar uma tarefa; remova quando terminar (e registre no Regi
 | :--- | :--- | :--- |
 | Cadastrar o grupo na planilha | Grupo 4 | ✅ concluído |
 | Dataloader EMNIST (36 classes) | Guilherme | ✅ concluído |
-| Arquitetura + treino do VAE | Guilherme | ✅ concluído (`results/base_vae/`) |
-| Validação das reconstruções do VAE | Guilherme | ✅ concluído |
-| Arquitetura + treino do Flow (Φ) — meta 22/11 | | ⬜ a fazer |
-| Sampler z(0) → z(1) e geração x = μ_D(z(1)) | | ⬜ a fazer |
-| (Bônus) Condicionamento 36 classes + CFG — meta 25/11 | | ⬜ a fazer |
-| Notebook final no Colab — meta 28/11 | | ⬜ a fazer |
+| Arquitetura + treino do VAE (+ análise de β) | Guilherme / João Paulo | ✅ concluído |
+| CVAE (VAE condicional) | João Paulo | ✅ concluído |
+| Flow Φ(z, t) + sampler Euler/Heun | João Paulo | ✅ concluído (`notebooks/final_task_refactored.ipynb`) |
+| (Bônus) Φ(z, t, c) + CFG | Guilherme | ✅ concluído (Seção 9, `results/cfg_flow/`) |
+| Rodar *Executar tudo* no Colab (GPU) e salvar com saídas | | ⬜ a fazer |
 | Slides em PDF (15 min) — meta 28/11 | | ⬜ a fazer |
 | Envio do e-mail (até 30/11 23:59) | | ⬜ a fazer |
 
@@ -58,6 +57,35 @@ Status: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 ---
 
 ## Registro
+
+### 2026-11-25 — Guilherme
+- **Tarefa:** `[cfg]` `[notebook]` Integração do CFG no notebook refatorado
+- **O que foi feito:** o João substituiu `final_task.ipynb` por `final_task_refactored.ipynb`, o que gerou conflito com a seção de CFG. O conflito foi resolvido aceitando o notebook refatorado, e o bônus virou a **Seção 9**, nas convenções dele: `CFG_DIR` e `TRAIN_CFG_FLOW` na Seção 0 (treinar ou carregar), subseções 9.1–9.5 e tabela de resultados. "Try it yourself" passou a ser a Seção 10 e "Summary" a 11 (com o item 6 sobre CFG). Índice, overview e badge do Colab atualizados.
+- **Arquivos / links:** `notebooks/final_task_refactored.ipynb`, `tools/cfg_cells.py`, `tools/add_cfg_section.py`
+- **Resultados:** Seção 9 testada dentro do notebook refatorado, nos modos treinar e carregar.
+
+### 2026-11-25 — João Paulo
+- **Tarefa:** `[notebook]` Refatoração do notebook final
+- **O que foi feito:** `notebooks/final_task_refactored.ipynb` substitui `final_task.ipynb`: seções numeradas com teoria e arquitetura, Seção 0 com Google Drive e chaves treinar/carregar, β sweep com 4 valores, discussão dos resultados e resumo final.
+- **Observação:** registrado por Guilherme a partir dos commits `929ad6b` e `94b0a7a`.
+
+### 2026-11-24 — Guilherme
+- **Tarefa:** `[cfg]` `[notebook]` `[docs]` Bônus (CFG) + organização do repositório
+- **O que foi feito:**
+  - Nova seção **Bonus (+5)** no `notebooks/final_task.ipynb` (hoje Seção 9 do notebook refatorado), antes de *Try it yourself*: campo de velocidade condicional Φ(z, t, c) com blocos AdaLN, embedding de classe + token nulo, *label dropout* (p = 0,15), EMA dos pesos e amostragem Euler/Heun com **Classifier-Free Guidance**. Treinado sobre os latentes do **VAE incondicional**.
+  - Avaliação quantitativa: um CNN classificador treinado no EMNIST real mede se o caractere gerado é da classe pedida (acurácia × *w*, Euler × Heun, diversidade).
+  - Widget com controle deslizante para *w*. Célula de setup (cria as pastas) e badge do Colab no topo do notebook.
+  - README reescrito (visão geral, resultados, como rodar, estrutura). O enunciado foi para `docs/enunciado.md` e o plano de ensino para `docs/plano_de_ensino.md`. O código antigo em scripts (`src/`, `train_vae.py`, notebook 01) foi para `legacy/`.
+- **Arquivos / links:** `tools/cfg_cells.py` (fonte das células), `tools/add_cfg_section.py`, `results/cfg_flow/`
+- **Resultados:** 100 épocas em CPU (~5 min). Acurácia de classe das amostras (CNN treinado no EMNIST real, que acerta 89,8% no teste real): *w* = 0 → 2,6% (acaso), *w* = 1 → 87,6%, *w* = 3 → **97,7%**, *w* = 5 → 98,6%. Heun com 5 passos já é suficiente. Figuras e métricas em `results/cfg_flow/`. As saídas do notebook ainda precisam ser geradas no Colab.
+- **Próximos passos / pendências:** rodar *Executar tudo* no Colab com GPU e salvar o notebook com as saídas; slides; e-mail.
+
+### 2026-11-23 — João Paulo
+- **Tarefa:** `[notebook]` `[vae]` `[flow]` `[sampler]` Notebook final
+- **O que foi feito:** `notebooks/final_task.ipynb` com dados, VAE, análise de β, **CVAE** (decoder condicionado na classe), **Rectified Flow** no latente (VelocityNet com embedding senoidal, samplers Euler e Heun), visualização do campo de velocidade em PCA, geração completa flow + CVAE e widget "Try it yourself".
+- **Arquivos / links:** `notebooks/final_task.ipynb`
+- **Resultados:** flow treinado por 200 épocas nos latentes do CVAE (MSE de validação ≈ 1,32).
+- **Observação:** registrado por Guilherme a partir do commit `de9aafb`. João / Fábio, corrijam se a divisão foi outra.
 
 ### 2026-11-14 — Guilherme
 - **Tarefa:** `[entrega]` Cadastro do grupo

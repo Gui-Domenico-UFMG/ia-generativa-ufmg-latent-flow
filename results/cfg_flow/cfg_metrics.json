@@ -1,0 +1,69 @@
+{
+  "classifier_real_test_acc": 0.8982638888888889,
+  "results": [
+    {
+      "w": 0.0,
+      "method": "heun",
+      "steps": 25,
+      "class_acc": 0.025833332911133766,
+      "confidence": 0.026479601860046387,
+      "diversity": 0.2076520174741745
+    },
+    {
+      "w": 1.0,
+      "method": "heun",
+      "steps": 25,
+      "class_acc": 0.8755555748939514,
+      "confidence": 0.8313299417495728,
+      "diversity": 0.17062796652317047
+    },
+    {
+      "w": 2.0,
+      "method": "heun",
+      "steps": 25,
+      "class_acc": 0.9636111259460449,
+      "confidence": 0.9315855503082275,
+      "diversity": 0.16611343622207642
+    },
+    {
+      "w": 3.0,
+      "method": "heun",
+      "steps": 25,
+      "class_acc": 0.977222204208374,
+      "confidence": 0.9421588182449341,
+      "diversity": 0.16785140335559845
+    },
+    {
+      "w": 5.0,
+      "method": "heun",
+      "steps": 25,
+      "class_acc": 0.9855555295944214,
+      "confidence": 0.9461650848388672,
+      "diversity": 0.17497532069683075
+    },
+    {
+      "w": 3.0,
+      "method": "euler",
+      "steps": 10,
+      "class_acc": 0.9783333539962769,
+      "confidence": 0.943825364112854,
+      "diversity": 0.15440748631954193
+    },
+    {
+      "w": 3.0,
+      "method": "euler",
+      "steps": 50,
+      "class_acc": 0.9783333539962769,
+      "confidence": 0.9425668716430664,
+      "diversity": 0.16527189314365387
+    },
+    {
+      "w": 3.0,
+      "method": "heun",
+      "steps": 5,
+      "class_acc": 0.9766666889190674,
+      "confidence": 0.9415540099143982,
+      "diversity": 0.16587840020656586
+    }
+  ]
+}
