@@ -36,6 +36,7 @@ x ──► Encoder ──► μ_E(x) = z(1) ─┐            z(0) ~ N(0, I)
 | VAE | CNN com m = 16, loss $R(x) + \beta L(x)$ do enunciado, β = 0,25 (com comparação de vários β) | Seções 4 e 5 |
 | CVAE | Encoder e decoder recebem a classe (embedding), outra forma de controlar a geração | Seção 6 |
 | Flow Φ(z, t) | MLP residual com embedding senoidal do tempo, flow matching, samplers Euler e Heun, geração com o decoder do CVAE | Seções 7 e 8 |
+| Pipeline incondicional do enunciado | Φ(z, t, ∅) + decoder do VAE, x = μ_D(z(1)), lado a lado com o VAE sozinho a partir do mesmo z(0) | Seção 9.3 |
 | **Bônus: Φ(z, t, c) + CFG** | Embedding de classe + token nulo, *label dropout* de 15%, $v = \Phi_\varnothing + w(\Phi_c - \Phi_\varnothing)$ | Seção 9 |
 
 ## Resultados
@@ -56,6 +57,7 @@ x ──► Encoder ──► μ_E(x) = z(1) ─┐            z(0) ~ N(0, I)
 - **O CFG funciona:** com *w* = 0 a classe é ignorada (acurácia no nível do acaso). Com *w* = 1 já acerta 88%, e com *w* ≥ 2 passa de 96%, acima até das imagens reais, porque o guidance gera versões mais "típicas" de cada caractere.
 - **Custo:** *w* maior troca diversidade por fidelidade. O ponto de equilíbrio fica em *w* ≈ 2–3.
 - **Sampler:** como o caminho do Rectified Flow é quase reto, 5 passos de Heun ou 10 de Euler já bastam.
+- **Reprodutibilidade:** o classificador "juiz" agora é treinado com semente fixa. Sem ela, os números variavam cerca de 1 ponto entre execuções (numa execução de conferência: 96,7% com *w* = 3). A rodada final no Colab usa o VAE de 200 épocas da Seção 4, então os valores podem diferir um pouco desta tabela.
 
 | Efeito do guidance *w* (mesmo z(0) em cada coluna) | Fidelidade × diversidade |
 | :---: | :---: |
