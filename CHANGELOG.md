@@ -59,6 +59,12 @@ Status: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 ## Registro
 
 ### 2026-11-25 — Guilherme
+- **Tarefa:** `[notebook]` `[entrega]` *Executar tudo* no Colab (T4) + números finais
+- **O que foi feito:** notebook executado inteiro no Colab com GPU T4 e salvo com as saídas (commit `4da71ab`), sem erros. Números do bônus atualizados no README, na tabela da Seção 9.4 e no resumo (Seção 11). Corrigido o gráfico de loss do Flow (Seção 7.5), que não aparecia: `plot_loss_history` usava `plt.show()`, que não faz nada depois do `matplotlib.use("Agg")` da Seção 3.2. Agora usa `display(fig)`, como as outras funções de plot.
+- **Resultados:** classificador 90,4% no teste real; CFG com Heun 25 passos: *w* = 0 → 2,7%, *w* = 1 → 87,8%, *w* = 3 → **96,6%**, *w* = 5 → 97,6%. VAE: melhor época 180, teste R ≈ 5,0. CVAE: melhor época 191 (teste 9,24).
+- **Próximos passos / pendências:** rodar de novo só as células da Seção 7.5 no Colab (ou *Executar tudo*) para o gráfico de loss do Flow aparecer; alinhar os números da Rota B nos slides; enviar o e-mail até 30/11.
+
+### 2026-11-25 — Guilherme
 - **Tarefa:** `[cfg]` `[notebook]` Pipeline incondicional explícito + reprodutibilidade da avaliação
 - **O que foi feito:** nova célula na Seção 9.3 que mostra a Etapa 3 do enunciado isolada: Φ(z, t, ∅) (CFG com *w* = 0) + decoder do VAE, comparada com o VAE sozinho a partir do mesmo z(0). O classificador "juiz" da Seção 9.4 passou a ter semente fixa (antes os números variavam ~1 ponto por execução). A Seção 9 foi testada em CPU com os checkpoints de `results/` e roda sem erros.
 - **Arquivos / links:** `tools/cfg_cells.py`, `notebooks/final_task_refactored.ipynb` (regenerado com `tools/add_cfg_section.py`), `README.md`
