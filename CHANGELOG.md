@@ -48,15 +48,26 @@ Coloque seu nome ao pegar uma tarefa; remova quando terminar (e registre no Regi
 | CVAE (VAE condicional) | João Paulo | ✅ concluído |
 | Flow Φ(z, t) + sampler Euler/Heun | João Paulo | ✅ concluído (`notebooks/final_task_refactored.ipynb`) |
 | (Bônus) Φ(z, t, c) + CFG | Guilherme | ✅ concluído (Seção 9, `results/cfg_flow/`) |
-| Rodar *Executar tudo* no Colab (GPU) e salvar com saídas | | ⬜ a fazer |
-| Slides em PDF (15 min) — meta 28/11 | | ⬜ a fazer |
+| Rodar *Executar tudo* no Colab (GPU) e salvar com saídas | Guilherme | ✅ concluído (commit `4da71ab`); falta rodar de novo a Seção 7.5 para o gráfico de loss do Flow |
+| Slides em PDF (15 min) — meta 28/11 | Guilherme | ✅ concluído (`slides/`, 24 slides) |
 | Envio do e-mail (até 30/11 23:59) | | ⬜ a fazer |
+| Apresentação (01/12, 15 min) | Grupo 4 | ⬜ a fazer |
 
 Status: ⬜ a fazer · 🟨 em andamento · ✅ concluído
 
 ---
 
 ## Registro
+
+### 2026-11-26 — Guilherme
+- **Tarefa:** `[notebook]` `[docs]` Revisão final antes da entrega
+- **O que foi feito:**
+  - Seção 8: `generate_data_samples` ignorava a semente (criava um `torch.Generator` que nunca era usado), então `seed=2` não fixava a figura. Agora usa `torch.manual_seed(seed)`. O padrão passou a ser `seed=None`, assim o widget da Seção 10 continua gerando estilos diferentes a cada clique.
+  - Seção 7.1: nota explicando que o notebook usa t = 0 no dado e t = 1 no ruído, o contrário do enunciado (mesma reta com t → 1 − t), e que a Seção 9 segue a convenção do enunciado.
+  - Célula de título: o `#` sem espaço impedia o título de aparecer como cabeçalho. Também saiu o badge do Colab repetido (já existe na primeira célula).
+  - Tabela "Em andamento" atualizada.
+- **Arquivos / links:** `notebooks/final_task_refactored.ipynb`, `CHANGELOG.md`
+- **Próximos passos / pendências:** rodar de novo as Seções 7.5 e 8 no Colab e salvar com as saídas (a figura da Seção 8 salva no notebook ainda é da execução sem semente); o `cfg_flow.pt` precisa vir da mesma rodada que o `vae.pt` usado (o de `results/cfg_flow/` casa com o VAE de 20 épocas de `results/base_vae/`); enviar o e-mail até 30/11.
 
 ### 2026-11-25 — Guilherme
 - **Tarefa:** `[slides]` Rota B dos slides alinhada com a Seção 9 do notebook entregue
